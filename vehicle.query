@@ -1,0 +1,1 @@
+query RootVehicles { vehicle {id, name} }

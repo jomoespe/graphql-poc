@@ -1,0 +1,1 @@
+query getHighScores(limit: 10) { score }
