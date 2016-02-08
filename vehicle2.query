@@ -1,5 +1,5 @@
 { 
-  Vehicle(id:"1") {
+  Vehicle(id:"2") {
     name, state
   }
 }

@@ -47,7 +47,7 @@ public class Vehicles {
                 field.getSelectionSet().getSelections().forEach(System.out::println);
             });
             System.out.printf("\tSource=%s\n", env.getSource());
-            return new LinkedHashMap<Object, Object>() {{ put("id", 1); put("name", "toyota"); put("state", Boolean.TRUE); }};
+            return new LinkedHashMap<Object, Object>() {{ put("id", id); put("name", "toyota " + id); put("state", Boolean.TRUE); }};
         };
       
         GraphQLEnumType vehicleStateEnum = newEnum()
