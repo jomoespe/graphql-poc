@@ -1,6 +1,7 @@
 package com.josemorenoesteban.java.samples.graphql.query1;
 
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
+import static graphql.schema.GraphQLEnumType.newEnum;;
 import static graphql.schema.GraphQLObjectType.newObject;
 import static spark.Spark.*;
 
@@ -9,7 +10,8 @@ import graphql.GraphQL;
 import graphql.GraphQLError;
 import graphql.Scalars;
 import graphql.schema.DataFetcher;
-import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 
@@ -34,32 +36,43 @@ public class Vehicles {
     static final int    COUNT        = 0;
     
     public static void main(String[] args) {
-        DataFetcher vehiclesFetcher = (environment) -> {
+        DataFetcher vehiclesFetcher = (env) -> {
+            // Query arguments
             System.out.printf("Data fetcher...\n");
-            System.out.printf("\tArguments:\n");
-            environment.getArguments().forEach((key, value) -> System.out.printf("\t\t%s=%s\n", key, value) );
-            System.out.printf("\tFields:\n");
-            environment.getFields().forEach((field) -> System.out.printf("\t\tfield=%s\n", field) );
-            System.out.printf("\tSource=%s\n", environment.getSource());
+            String id = env.getArgument("id");
+            System.out.printf("\tid=%s\n", id);
             
+            System.out.printf("Output...\n");
+            env.getFields().forEach((field) -> {
+                field.getSelectionSet().getSelections().forEach(System.out::println);
+            });
+            System.out.printf("\tSource=%s\n", env.getSource());
             return new LinkedHashMap<Object, Object>() {{ put("id", 1); put("name", "toyota"); put("state", Boolean.TRUE); }};
         };
+      
+        GraphQLEnumType vehicleStateEnum = newEnum()
+            .name("VechicleStatus")
+            .value("FREE",     Boolean.TRUE, "")
+            .value("RESERVED", Boolean.TRUE, "")
+            .build();
         
         GraphQLObjectType vehicleType = newObject()
             .name("Vehicle")
             .field(newFieldDefinition().name("id").type(Scalars.GraphQLString).build())
             .field(newFieldDefinition().name("name").type(Scalars.GraphQLString).build())
-            .field(newFieldDefinition().name("state").type(Scalars.GraphQLString).build())
-            .build();
-        
-        GraphQLFieldDefinition vehicleField = newFieldDefinition()
-            .name("vehicle")
-            .type(vehicleType)
-            .dataFetcher(vehiclesFetcher)
+            .field(newFieldDefinition().name("state").type(vehicleStateEnum).build())
             .build();
 
         GraphQLSchema graphQLSchema = GraphQLSchema.newSchema()
-            .query(newObject().name("RootVehicles").field(vehicleField).build())
+            .query(newObject()
+                    .name("oneVehicle")
+                    .field(newFieldDefinition()
+                        .name("Vehicle")
+                        .type(vehicleType)
+                        .argument(GraphQLArgument.newArgument().name("id").type(Scalars.GraphQLString).build())
+                        .dataFetcher(vehiclesFetcher)
+                        .build())
+                    .build())
             .build();
 
 

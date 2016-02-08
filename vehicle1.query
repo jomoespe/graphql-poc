@@ -1,1 +1,1 @@
-query RootVehicles { Vehicle {id, name} }
+query oneVehicle { Vehicle (id: 1) }
